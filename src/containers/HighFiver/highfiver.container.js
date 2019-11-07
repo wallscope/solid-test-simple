@@ -206,6 +206,11 @@ function ListWrapper({ webId, hi5Path }) {
     await ldflex[url][pred.rdfs.label].replace(status, HighFiveStatus.DECLINED);
     init()
   }
+
+  const deleteHi5 = async ({ url, status }) => {
+    await ldflex[url][pred.rdfs.label].replace(status, HighFiveStatus.DECLINED);
+    init()
+  }
   /**
  * Inits the hi5 by fetching own hi5s and hi5s the player has been invited to
  */
@@ -242,13 +247,13 @@ function ListWrapper({ webId, hi5Path }) {
       {sentList && (<section className="item">
         <h2>Sent:</h2>
         {sentLoading && (<p>Loading...</p>)}
-        <HighFiveList items={sentList} webId={webId} />
+        {!sentLoading && (<HighFiveList items={sentList} webId={webId} onDelete={deleteHi5} />)}
         {!sentLoading && !sentList.length && (<p>You've sent no High Fives yet, get High Fivin'! :D</p>)}
       </section>)}
       {receivedList && (<section className="item">
         <h2>Received:</h2>
         {receivedLoading && (<p>Loading...</p>)}
-        <HighFiveList items={receivedList} webId={webId} onAccept={acceptHi5} onReject={rejectHi5} />
+        {!receivedLoading && (<HighFiveList items={receivedList} webId={webId} onDelete={deleteHi5} onAccept={acceptHi5} onReject={rejectHi5} />)}
         {!receivedLoading && !receivedList.length && (<p>You got no High Fives yet :'(</p>)}
       </section>)}
     </section>

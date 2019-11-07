@@ -3,10 +3,10 @@ import { HighFiveListWrapper, Hi5 } from './highfiver.style'
 import moment from 'moment'
 import { HighFiveStatus } from '@constants'
 
-type HighFiveProps = { url: String, actor: String, target: String, status: String, onAccept: Function, onReject: Function };
+type HighFiveProps = { url: String, actor: String, target: String, status: String, onAccept: Function, onReject: Function, onDelete: Function };
 
-export function HighFive({ webId, url, actor, target, status, created, onAccept, onReject }: HighFiveProps) {
-
+export function HighFive({ webId, url, actor, target, status, created, onAccept, onReject, onDelete }: HighFiveProps) {
+  const props = {url, actor, target, status, created}
   const getText = () => {
     if (webId === actor.webId) {
       return (<p>Sent High Five Hi5 to <br />{actor.name}</p>)
@@ -26,8 +26,8 @@ export function HighFive({ webId, url, actor, target, status, created, onAccept,
   const getButtons = () => {
     if (webId !== actor.webId && status !== HighFiveStatus.ACCEPTED && status !== HighFiveStatus.DECLINED) {
       return <div>
-        <button className="ids-link-stroke ids-link-stroke--primary" onClick={() => onAccept({ url, actor, target, status })}>Hi5 Back!</button>
-        <button className="ids-link-stroke ids-link-stroke--primary" onClick={() => onReject({ url, actor, target, status })}>Leave them hanging...</button>
+        <button className="ids-link-stroke ids-link-stroke--primary" onClick={() => onAccept(props)}>Hi5 Back!</button>
+        <button className="ids-link-stroke ids-link-stroke--primary" onClick={() => onReject(props)}>Leave them hanging...</button>
       </div>
     }
     return
@@ -44,6 +44,9 @@ export function HighFive({ webId, url, actor, target, status, created, onAccept,
 
   return (
     <Hi5>
+      <div className="delete">
+        <button className="ids-link-stroke" onClick={() => onDelete(props)}>Delete</button>
+      </div>
       {getText()}
       {getImg()}
       {getButtons()}
@@ -53,9 +56,11 @@ export function HighFive({ webId, url, actor, target, status, created, onAccept,
 }
 
 export function HighFiveList({ webId, items, onAccept, onReject }) {
+  // create a sorted list of hi5s. have to copy the array to avoid mutating the prop
+  const list = [...items].sort((a,b) => moment(b.created).diff(moment(a.created)))
   return (
     <HighFiveListWrapper>
-      {items.map((i, idx) => (
+      {list.map((i, idx) => (
         <HighFive key={idx} webId={webId} url={i.url} actor={i.actor} target={i.target} status={i.status} created={i.created} onAccept={onAccept} onReject={onReject} />
       ))}
     </HighFiveListWrapper>

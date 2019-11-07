@@ -65,7 +65,25 @@ export const Hi5 = styled.div`
   min-width: 200px;
   padding: 5px;
   text-align: center;
-  & button {
+  button {
     margin-left: 0px;
+  }
+  &:hover{ 
+    .delete {
+      display: block;
+    }
+  }
+  .delete {
+    position: absolute;
+    display: none;
+    button {
+      border-color: #ff2b2b;
+      color: #ff2b2b;
+      &:hover {
+        color: #ffffff;
+        background-color: #ff2b2b;
+        border-color: #ff1b1b;
+      }
+    }
   }
 `;

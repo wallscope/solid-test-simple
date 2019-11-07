@@ -91,7 +91,8 @@ const HighFiveForm = ({ webId, sendNotification, setFriend, friend }) => {
            * <> a as:Activity ;
            *  as:actor <me> ;
            *  dct:created "YYYY-MM-DDThh:mm:ss"^^xsd:date ;
-           *  as:target <friend> .
+           *  as:target <friend> 
+           *  rdfs:label "HighFiveStatus.STATUS".
            */
           await Promise.all([
             document[pred.rdf.type].add(namedNode(types.as.Activity)),
@@ -100,8 +101,6 @@ const HighFiveForm = ({ webId, sendNotification, setFriend, friend }) => {
             document[pred.as.target].add(setupObj.target),
             document[pred.rdfs.label].add(setupObj.status),
           ])
-
-          console.log(`created high five to ${friend}`)
 
           /**
            * Find the friend's game-specific inbox. If it doesn't exist, get the global inbox instead
@@ -126,7 +125,6 @@ const HighFiveForm = ({ webId, sendNotification, setFriend, friend }) => {
         errorToaster(`${friend} ${t('game.createFolder.message')}`, t('notifications.error'));
         return null;
       }
-      console.log('inboxes empty')
       errorToaster(`${friend} ${t('noInboxfriend.message')}`, t('notifications.error'), {
         label: t('noInboxfriend.link.label'),
         href: t('noInboxfriend.link.href')
@@ -134,7 +132,6 @@ const HighFiveForm = ({ webId, sendNotification, setFriend, friend }) => {
 
       return null;
     } catch (e) {
-      console.error(e)
       throw new Error(e);
     }
   };
@@ -180,7 +177,7 @@ const HighFiveForm = ({ webId, sendNotification, setFriend, friend }) => {
       <div className="input-wrap"><label>Who do you want to High Five?:</label>
         <input type="text" placeholder="Web ID" onChange={e => setFriend(e.target.value)} />
       </div>
-      <button type="submit" className="ids-link-stroke ids-link-stroke--primary">Button</button>
+      <button type="submit" className="ids-link-stroke ids-link-stroke--primary">High Five!</button>
     </form>
   )
 }

@@ -1,7 +1,6 @@
 import data from '@solid/query-ldflex';
 
-const appPath = process.env.REACT_APP_STORAGE_PATH;
-console.log(appPath)
+export const appPath = process.env.REACT_APP_STORAGE_PATH;
 
 /**
  * Creates a valid string that represents the application path. This is the

@@ -3,8 +3,8 @@ import { withWebId, useNotification, LiveUpdate, useLiveUpdate } from '@inrupt/s
 import { useTranslation } from 'react-i18next';
 import { HighFiveList } from "./highfiver.component";
 import HighFiveForm from './children/Form'
+import { Card, Detail, Wrapper } from './highfiver.style'
 import ldflex from '@solid/query-ldflex';
-import { namedNode } from '@rdfjs/data-model';
 import { HighFiveStatus } from '@constants'
 import { ldflexHelper, storageHelper, errorToaster, notification as helperNotification } from '@utils';
 
@@ -72,16 +72,22 @@ function HighFiver({ webId }) {
   }, [webId, notification.notify]);
 
   return (
-    <section className="grid grid__one-column">
-      <section className="item">
-        <HighFiveForm webId={webId} sendNotification={sendNotification} setFriend={setFriend} friend={friend} />
-        {hi5Path && (
-          <LiveUpdate subscribe={hi5Path}>
-            <ListWrapper {...{ webId, hi5Path }} />
-          </LiveUpdate>
-        )}
-      </section>
-    </section>
+    <Wrapper>
+      <Card>
+        <Detail>
+          <HighFiveForm webId={webId} sendNotification={sendNotification} setFriend={setFriend} friend={friend} />
+        </Detail>
+      </Card>
+      <Card>
+        <Detail>
+          {hi5Path && (
+            <LiveUpdate subscribe={hi5Path}>
+              <ListWrapper {...{ webId, hi5Path }} />
+            </LiveUpdate>
+          )}
+        </Detail>
+      </Card>
+    </Wrapper>
   )
 }
 
@@ -90,9 +96,9 @@ export default withWebId(HighFiver)
 function ListWrapper({ webId, hi5Path }) {
   const [sentList, setSentList] = useState([]);
   const [receivedList, setReceivedList] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { timestamp, url } = useLiveUpdate();
-  const { t } = useTranslation();
+  const [sentLoading, setSentLoading] = useState(false);
+  const [receivedLoading, setReceivedLoading] = useState(false);
+  const { timestamp } = useLiveUpdate();
   let appPath;
   /**
    * Get basic info for the opponent player (name and image url)
@@ -188,15 +194,15 @@ function ListWrapper({ webId, hi5Path }) {
     }
     const fullActor = await getUserInfo(hi5Data.actor)
     const fullTarget = await getUserInfo(hi5Data.target)
-    
+
     return { ...hi5Data, actor: fullActor, target: fullTarget }
   }
 
-  const acceptHi5 = async ({url, status}) => {
+  const acceptHi5 = async ({ url, status }) => {
     await ldflex[url][pred.rdfs.label].replace(status, HighFiveStatus.ACCEPTED);
     init()
   }
-  const rejectHi5 = async ({url, status}) => {
+  const rejectHi5 = async ({ url, status }) => {
     await ldflex[url][pred.rdfs.label].replace(status, HighFiveStatus.DECLINED);
     init()
   }
@@ -204,11 +210,13 @@ function ListWrapper({ webId, hi5Path }) {
  * Inits the hi5 by fetching own hi5s and hi5s the player has been invited to
  */
   const init = useCallback(async () => {
-    setIsLoading(true);
+    setSentLoading(true);
+    setReceivedLoading(true);
     appPath = await storageHelper.getAppStorage(webId);
 
     const senthi5s = await gethi5s(hi5Path);
     setSentList(senthi5s)
+    setSentLoading(false);
 
     // Get the invites sent to :me
     const hi5Settings = `${appPath}settings.ttl`;
@@ -224,20 +232,24 @@ function ListWrapper({ webId, hi5Path }) {
     }
     setReceivedList(receivedhi5s)
 
-    setIsLoading(false);
+    setReceivedLoading(false);
   });
   useEffect(() => {
     if (hi5Path) init();
-  }, [hi5Path]);
+  }, [hi5Path, timestamp]);
   return (
     <section className="grid grid_two-column">
-      {sentList && (<section>
-        <p>Sent:</p>
+      {sentList && (<section className="item">
+        <h2>Sent:</h2>
+        {sentLoading && (<p>Loading...</p>)}
         <HighFiveList items={sentList} webId={webId} />
+        {!sentLoading && !sentList.length && (<p>You've sent no High Fives yet, get High Fivin'! :D</p>)}
       </section>)}
-      {receivedList && (<section>
-        <p>Received:</p>
+      {receivedList && (<section className="item">
+        <h2>Received:</h2>
+        {receivedLoading && (<p>Loading...</p>)}
         <HighFiveList items={receivedList} webId={webId} onAccept={acceptHi5} onReject={rejectHi5} />
+        {!receivedLoading && !receivedList.length && (<p>You got no High Fives yet :'(</p>)}
       </section>)}
     </section>
   )

@@ -55,14 +55,14 @@ export const Detail = styled.div`
 
 export const HighFiveListWrapper = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fill, 200px);
   grid-gap: 20px;
 `;
 
 export const Hi5 = styled.div`
   border: 2px solid #666666;
   border-radius: 10px;
-  min-width: 200px;
+  width: 200px;
   padding: 5px;
   text-align: center;
   button {

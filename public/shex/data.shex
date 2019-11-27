@@ -1,0 +1,39 @@
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+<MarriageData> CLOSED {                                                 # A Person has:
+ foaf:givenName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}        #   one or more given names (stored as a single property)
+ // rdfs:label "First Name"@en ;
+ foaf:familyName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}       #   one family name here meaning the maiden name
+ // rdfs:label "Maiden Name"@en ;
+ foaf:lastName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}         #   one last name here meaning the married name
+ // rdfs:label "Married Name"@en ;
+ foaf:birthday xsd:date {1}                                     #   one birthday formatted as xsd:date
+ // rdfs:label "Birthday"@en ;
+}
+
+<AddressData> CLOSED {
+  vcard:street-address xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
+    // rdfs:label "Street Address"@en ;
+  vcard:locality xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
+    // rdfs:label "Locality"@en ;
+  vcard:postal-code xsd:string /^(([A-Z][0-9]{1,2})|(([A-Z][A-HJ-Y][0-9]{1,2})|(([A-Z][0-9][A-Z])|([A-Z][A-HJ-Y][0-9]?[A-Z])))) [0-9][A-Z]{2}$/ {1}
+    // rdfs:label "Postal Code"@en ;
+  vcard:region xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
+    // rdfs:label "Region"@en ;
+  vcard:country-name xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
+    // rdfs:label "Country"@en ;
+}
+
+
+
+################### EXAMPLES ######################################
+
+#
+#<P2>
+#  foaf:givenName "Alex";
+#  foaf:familyName "Williams";
+#  foaf:lastName "Smith";
+#  foaf:birthday "09-08-1989" .

@@ -13,6 +13,12 @@ export const NavigationItems = [
     icon: '/img/high5.svg',
     label: 'navBar.highfiver',
     to: '/highfiver'
+  },
+  {
+    id: 'shexform',
+    icon: '/img/high5.svg',
+    label: 'navBar.shexform',
+    to: '/shexform'
   }
 ];
 

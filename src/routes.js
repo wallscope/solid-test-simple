@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { PrivateLayout, PublicLayout, NotLoggedInLayout } from '@layouts';
 import { BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
 
-import { Login, Register, PageNotFound, Welcome, RegistrationSuccess, HighFiver } from './containers';
+import { Login, Register, PageNotFound, Welcome, RegistrationSuccess, HighFiver, ShexFormPlayground } from './containers';
 
 export const privateRoutes = [
   {
@@ -14,6 +14,11 @@ export const privateRoutes = [
     id: 'highfiver',
     path: '/highfiver',
     component: HighFiver
+  },
+  {
+    id: 'shexform',
+    path: '/shexform',
+    component: ShexFormPlayground
   },
 ];
 

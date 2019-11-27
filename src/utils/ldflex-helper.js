@@ -1,12 +1,17 @@
 import auth from 'solid-auth-client';
 import ldflex from '@solid/query-ldflex';
 
-export const documentExists = async documentUri =>
+export const documentPing = async documentUri =>
   auth.fetch(documentUri, {
     headers: {
       'Content-Type': 'text/turtle'
     }
   });
+
+  export const documentExists = async documentUri => {
+    const {status} = await documentPing(documentUri);
+    return status !== 404;
+  }
 
 const createDoc = async (documentUri, options) => {
   try {
@@ -55,7 +60,7 @@ export const createDocumentWithTurtle = async (documentUri, body = '') => {
 
 export const createNonExistentDocument = async (documentUri, body = '') => {
   try {
-    const result = await documentExists(documentUri);
+    const result = await documentPing(documentUri);
 
     return result.status === 404 ? createDocument(documentUri, body) : null;
   } catch (e) {
@@ -65,7 +70,7 @@ export const createNonExistentDocument = async (documentUri, body = '') => {
 
 export const fetchLdflexDocument = async documentUri => {
   try {
-    const result = await documentExists(documentUri);
+    const result = await documentPing(documentUri);
     if (result.status === 404) return null;
     const document = await ldflex[documentUri];
     return document;
@@ -81,8 +86,8 @@ export const folderExists = async folderPath => {
 
 export const discoverInbox = async document => {
   try {
-    const documentExists = await folderExists(document);
-    if (!documentExists) return false;
+    const documentPing = await folderExists(document);
+    if (!documentPing) return false;
 
     const inboxDocument = await ldflex[document]['ldp:inbox'];
     const inbox = inboxDocument ? await inboxDocument.value : false;
@@ -95,10 +100,26 @@ export const discoverInbox = async document => {
 export const createContainer = async folderPath => {
   try {
     const existContainer = await folderExists(folderPath);
+    console.log(folderPath, "exists: ", existContainer)
     const data = `${folderPath}data.ttl`;
     if (existContainer) return folderPath;
 
     await createDoc(data, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'text/turtle'
+      }
+    });
+
+    return folderPath;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+export const unsafeCreateContainer = async folderPath => {
+  try {
+    await createDoc(`${folderPath}data.ttl`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'text/turtle'

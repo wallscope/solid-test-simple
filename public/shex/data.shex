@@ -26,7 +26,7 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 }
 
 <AddressWrapper> CLOSED {
-  vcard:hasAdress @<AddressData>+
+  vcard:hasAddress @<AddressData>+
   // rdfs:label "Address"@en ;
 }
 

@@ -77,9 +77,9 @@ function ShexPlayground({ webId }) {
 
   useEffect(() => {
     if (webId) {
-      const m = storage.buildPathFromWebId(webId, "private/name/");
+      const m = storage.buildPathFromWebId(webId, "private/name");
       setnameStorage(m);
-      const a = storage.buildPathFromWebId(webId, "private/address/");
+      const a = storage.buildPathFromWebId(webId, "private/address");
       setAddressStorage(a);
     }
   }, [webId]);

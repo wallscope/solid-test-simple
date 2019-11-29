@@ -3,43 +3,47 @@ import { withWebId, ShexFormBuilder, AccessControlList } from '@inrupt/solid-rea
 import { useTranslation } from 'react-i18next';
 import { Card, Detail, Wrapper } from './shexpgnd.style'
 import ldflex from '@solid/query-ldflex';
+import auth from 'solid-auth-client';
+import { AclApi } from 'solid-acl-utils'
 import { errorToaster, storageHelper as storage, ldflexHelper as ld } from '@utils';
 import { createNonExistentDocument } from "../../utils/ldflex-helper";
 
-const ctx = {
-  "thing": "https://schema.org/Thing#",
-  "schema": "https://schema.org/",
-  "xsd": "http://www.w3.org/2001/XMLSchema#",
-  "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-  "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-  "as": "https://www.w3.org/ns/activitystreams#",
-  "dct": "http://purl.org/dc/terms/",
-  "game": "http://data.totl.net/game/"
-}
-
-const pred = {
-  rdf: { type: `${ctx.rdf}type` },
-  as: { actor: `${ctx.as}actor`, object: `${ctx.as}object`, target: `${ctx.as}target` },
-  dct: { created: `${ctx.dct}created` },
-  rdfs: { label: `${ctx.rdfs}label` }
-}
-
 function ShexPlayground({ webId }) {
-  const [marriageStorage, setMarriageStorage] = useState('')
+  const [nameStorage, setnameStorage] = useState('')
   const [addressStorage, setAddressStorage] = useState('')
   const [storageReady, setStorageReady] = useState(false)
+  const [agent, setAgent] = useState('')
 
   const { t } = useTranslation();
 
+
+  // Passing it the fetch from solid-auth-client
+  const localFetch = auth.fetch.bind(auth)
+  const aclApi = new AclApi(localFetch, { autoSave: false })
+
   const createContainer = async (webId, path) => {
-    const existContainer = await ld.folderExists(path);
-    if (existContainer) {
-      return path
+    try {
+      const existContainer = await ld.folderExists(path);
+      // const ACLFile = new AccessControlList(webId, path);
+      // await ACLFile.createACL();
+      if (existContainer) {
+        return path
+      }
+      const newPath = await ld.unsafeCreateContainer(path)
+      console.log(newPath)
+      // full permissions for owner are implicit
+      // const ACLFile = new AccessControlList(webId, path);
+      // await ACLFile.createACL();
+      // const acl = await aclApi.loadFromFileUrl(path)
+      // Note: Workaround, because currently no default permissions are copied when a new acl file is created. Not doing this could result in having no CONTROL permissions after the first acl.addRule call
+      // if (!acl.hasRule(Permissions.ALL, webId)) {
+      //   acl.addRule(Permissions.ALL, webId)
+      // }
+      // await acl.saveToPod()
+      return newPath
+    } catch (e) {
+      console.log(e)
     }
-    // full permissions for owner are implicit
-    const ACLFile = new AccessControlList(webId, path);
-    await ACLFile.createACL();
-    return await ld.unsafeCreateContainer(path)
   }
 
   const prepareStorage = async (webId, storage) => {
@@ -50,7 +54,7 @@ function ShexPlayground({ webId }) {
   const init = useCallback(async () => {
     try {
       await Promise.all([
-        prepareStorage(webId, marriageStorage),
+        prepareStorage(webId, nameStorage),
         prepareStorage(webId, addressStorage),
       ]);
       setStorageReady(true);
@@ -69,20 +73,20 @@ function ShexPlayground({ webId }) {
 
       errorToaster(e.message, 'Error');
     }
-  }, [webId, marriageStorage, addressStorage]);
+  }, [webId, nameStorage, addressStorage]);
 
   useEffect(() => {
     if (webId) {
-      const m = storage.buildPathFromWebId(webId, "private/marriage/");
-      setMarriageStorage(m);
+      const m = storage.buildPathFromWebId(webId, "private/name/");
+      setnameStorage(m);
       const a = storage.buildPathFromWebId(webId, "private/address/");
       setAddressStorage(a);
     }
   }, [webId]);
 
   useEffect(() => {
-    if (webId && marriageStorage && addressStorage) init()
-  }, [webId, marriageStorage, addressStorage])
+    if (webId && nameStorage && addressStorage) init()
+  }, [webId, nameStorage, addressStorage])
 
 
   const onSuccess = (x) => {
@@ -94,16 +98,26 @@ function ShexPlayground({ webId }) {
   }
 
   const giveFriendAccess = async () => {
-    const friend = "https://belvederef.inrupt.net/profile/card#me";
+    if (!agent) {
+      return errorToaster("Can't give permissions to an empty agent", 'Error');
+    }
     // full permissions for owner are implicit
-    const ACLFile = new AccessControlList(webId, `${marriageStorage}/data.ttl`);
+    const ACLFile = new AccessControlList(webId, `${nameStorage}/data.ttl`);
     const permissions = [
       {
-        agents: [friend],
+        agents: [agent],
         modes: [AccessControlList.MODES.READ]
       }
     ];
     await ACLFile.createACL(permissions);
+    // const acl = await aclApi.loadFromFileUrl(nameStorage)
+    // Note: Workaround, because currently no default permissions are copied when a new acl file is created. Not doing this could result in having no CONTROL permissions after the first acl.addRule call
+    // if (!acl.hasRule(Permissions.ALL, webId)) {
+    //   acl.addRule(Permissions.ALL, webId)
+    // }
+    // console.log(agent)
+    // acl.addRule(Permissions.READ, agent)
+    // await acl.saveToPod()
     console.log('done')
   }
 
@@ -112,15 +126,15 @@ function ShexPlayground({ webId }) {
       <Card>
         <Detail>
           {(storageReady && <ShexFormBuilder
-            rootShape={"MarriageData"} shexUri={"/shex/data.shex"}
-            documentUri={marriageStorage + 'data.ttl'}
+            rootShape={"NameData"} shexUri={"/shex/data.shex"}
+            documentUri={nameStorage + 'data.ttl'}
             onChange={onChange} onSuccess={onSuccess} />)}
 
           {(storageReady && <ShexFormBuilder
-            rootShape={"AddressData"} shexUri={"/shex/data.shex"}
+            rootShape={"AddressWrapper"} shexUri={"/shex/data.shex"}
             documentUri={addressStorage + 'data.ttl'}
             onChange={onChange} onSuccess={onSuccess} />)}
-
+          <input type="text" onInput={(evt) => setAgent(evt.target.value)} />
           <button onClick={giveFriendAccess} >Give Friend Access</button>
         </Detail>
       </Card>

@@ -3,28 +3,31 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-<MarriageData> CLOSED {                                                 # A Person has:
- foaf:givenName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}        #   one or more given names (stored as a single property)
- // rdfs:label "First Name"@en ;
- foaf:familyName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}       #   one family name here meaning the maiden name
- // rdfs:label "Maiden Name"@en ;
- foaf:lastName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}         #   one last name here meaning the married name
- // rdfs:label "Married Name"@en ;
- foaf:birthday xsd:date {1}                                     #   one birthday formatted as xsd:date
- // rdfs:label "Birthday"@en ;
+<NameData> CLOSED {                                                 # A Person has:
+ foaf:firstName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}        #   one or more given names (stored as a single property)
+ // rdfs:label "First Name(s)"@en ;
+ foaf:lastName xsd:string MINLENGTH 1 MAXLENGTH 255 {1}         #   one last name
+ // rdfs:label "Last Name"@en ;
+ rdfs:comment xsd:string {1}                                    #   reason for name change
+ // rdfs:label "Name change reason"@en ;
 }
 
 <AddressData> CLOSED {
+  vcard:isPreferred ["true"^^xsd:boolean "false"^^xsd:boolean]
+    // rdfs:label "preferred?"@en ;
   vcard:street-address xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
     // rdfs:label "Street Address"@en ;
   vcard:locality xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
     // rdfs:label "Locality"@en ;
-  vcard:postal-code xsd:string /^(([A-Z][0-9]{1,2})|(([A-Z][A-HJ-Y][0-9]{1,2})|(([A-Z][0-9][A-Z])|([A-Z][A-HJ-Y][0-9]?[A-Z])))) [0-9][A-Z]{2}$/ {1}
+  vcard:postal-code xsd:string /^(([A-Za-z][0-9]{1,2})|(([A-Za-z][A-HJ-Ya-hj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z])))) ?[0-9][A-Za-z]{2}$/ {1}
     // rdfs:label "Postal Code"@en ;
-  vcard:region xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
-    // rdfs:label "Region"@en ;
   vcard:country-name xsd:string MINLENGTH 0 MAXLENGTH 255 {1}
     // rdfs:label "Country"@en ;
+}
+
+<AddressWrapper> CLOSED {
+  vcard:hasAdress @<AddressData>+
+  // rdfs:label "Address"@en ;
 }
 
 
